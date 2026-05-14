@@ -57,7 +57,7 @@ ExamGhost fixes this by turning any content into a **real exam experience instan
 
 - Next.js (full-stack app)
 - Browser Speech APIs (voice input/output)
-- AI API (question generation only)
+- AI API
 - SQLite (local data storage)
 
 ---
@@ -69,6 +69,7 @@ Unlike normal quiz apps, ExamGhost:
 - tracks performance over time
 - builds a personal learning history
 - adapts to user behavior through analytics
+- can interact with voice 
 
 ---
 
