@@ -169,8 +169,8 @@ export function recalculateAnalytics() {
 
   // Create progress history
   const progressHistory = allAttempts.map((attempt) => ({
-    date: new Date(attempt.completedAt || 0).toISOString().split('T')[0],
-    score: ((attempt.correctCount / attempt.totalQuestions) * 100).toFixed(1),
+    date: new Date(attempt.completedAt || 0).getTime(),
+    score: (attempt.correctCount / attempt.totalQuestions) * 100,
   }));
 
   // Find weak topics (lowest scoring)

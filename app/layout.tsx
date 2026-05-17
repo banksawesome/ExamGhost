@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
-import { Navbar } from '@/components/navbar'
+import { SidebarProvider } from '@/components/exam-ghost/sidebar-context'
+import { Toaster } from '@/components/ui/toaster'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -36,13 +37,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="bg-white">
-      <body className="font-sans antialiased bg-white" suppressHydrationWarning>
-        <Navbar />
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <html lang="en">
+      <body className="font-sans antialiased" suppressHydrationWarning>
+        <SidebarProvider>
           {children}
-        </main>
+        </SidebarProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Toaster />
       </body>
     </html>
   )

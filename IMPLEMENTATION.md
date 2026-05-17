@@ -84,7 +84,7 @@ ExamGhost is a complete full-stack AI-powered exam simulation system that conver
 
 /lib
   db.ts                     # SQLite database layer
-  ai-client.ts              # Groq AI integration
+  ai-client.ts              # Gemini AI integration
   file-parser.ts            # PDF/text extraction
   voice.ts                  # Web Speech API utilities
 

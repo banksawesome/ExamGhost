@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
@@ -19,16 +19,19 @@ export default function ProcessingPage() {
   const voiceEnabled = searchParams.get('voice') === 'true';
 
   const [currentState, setCurrentState] = useState(0);
-  const [error, setError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const hasGenerated = useRef(false);
 
   useEffect(() => {
+    if (hasGenerated.current) return;
+    
+    hasGenerated.current = true;
+
     const generateExam = async () => {
       try {
-        // Show first state
         setCurrentState(0);
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // Call generate API
         setCurrentState(1);
         const response = await fetch(`/api/generate/${examId}`, {
           method: 'POST',
@@ -36,31 +39,36 @@ export default function ProcessingPage() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Generation failed');
+          setErrorMessage(errorData.error || 'Generation failed');
+          return;
         }
 
-        // Show final state
-        setCurrentState(2);
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const data = await response.json();
+        if (data.cached) {
+          setCurrentState(2);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } else {
+          setCurrentState(2);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
 
-        // Redirect to exam
         const voiceParam = voiceEnabled ? '&voice=true' : '';
         router.push(`/exam/${examId}?title=${encodeURIComponent(examTitle)}${voiceParam}`);
       } catch (err) {
-        setError((err as Error).message);
+        setErrorMessage((err as Error).message);
       }
     };
 
     generateExam();
   }, [examId, examTitle, voiceEnabled, router]);
 
-  if (error) {
+  if (errorMessage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="rounded-lg bg-red-50 p-6 text-red-700 max-w-md">
             <p className="font-medium">Generation Failed</p>
-            <p className="text-sm mt-2">{error}</p>
+            <p className="text-sm mt-2">{errorMessage}</p>
           </div>
           <button
             onClick={() => router.push('/')}

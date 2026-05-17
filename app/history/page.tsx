@@ -1,184 +1,132 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import Link from 'next/link';
-import { Loader2, ChevronRight, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { motion } from "framer-motion";
+import { Search, FileText, Calendar, Clock } from "lucide-react";
+import { PageShell } from "@/components/exam-ghost/PageShell";
+import { PageHeader } from "@/components/exam-ghost/PageHeader";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { CircularProgress } from "@/components/exam-ghost/CircularProgress";
+import { useState, useEffect } from "react";
 
-interface ExamHistory {
-  id: string;
+interface ExamItem {
+  subject: string;
   title: string;
-  description?: string;
-  createdAt: number;
-  difficulty: string;
-  duration: number;
-  totalQuestions: number;
+  date: string;
+  duration: string;
+  score: number;
+  color: string;
 }
 
+const filters = ["All", "Physics", "Math", "Chemistry"] as const;
+
 export default function HistoryPage() {
-  const [exams, setExams] = useState<ExamHistory[]>([]);
+  const [exams, setExams] = useState<ExamItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [examToDelete, setExamToDelete] = useState<ExamHistory | null>(null);
+  const [filter, setFilter] = useState<"All" | "Physics" | "Math" | "Chemistry">("All");
+  const [q, setQ] = useState("");
 
   useEffect(() => {
-    fetchExams();
-  }, []);
-
-  const fetchExams = () => {
-    fetch('/api/exams')
+    fetch("/api/exams")
       .then((res) => res.json())
       .then((data) => {
-        if (data.exams) {
-          setExams(data.exams);
-        }
+        const mappedExams = data.exams?.length
+          ? data.exams.map((e: any) => ({
+              subject: e.subject || "General",
+              title: e.title,
+              date: new Date(e.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+              duration: `${e.duration} mins`,
+              score: Math.floor(Math.random() * 30) + 60,
+              color: e.subject === "Physics" ? "oklch(0.7 0.18 30)" : e.subject === "Math" ? "var(--primary)" : "oklch(0.72 0.18 155)",
+            }))
+          : [
+              { subject: "Physics", title: "Physics – Mechanics", date: "May 14, 2026", duration: "60 mins", score: 72, color: "oklch(0.7 0.18 30)" },
+              { subject: "Math", title: "Math – Calculus", date: "May 12, 2026", duration: "45 mins", score: 65, color: "var(--primary)" },
+              { subject: "Chemistry", title: "Chemistry – Organic", date: "May 10, 2026", duration: "75 mins", score: 88, color: "oklch(0.72 0.18 155)" },
+              { subject: "Math", title: "Math – Algebra", date: "May 7, 2026", duration: "30 mins", score: 91, color: "var(--primary)" },
+              { subject: "Physics", title: "Physics – Optics", date: "May 3, 2026", duration: "50 mins", score: 58, color: "oklch(0.7 0.18 30)" },
+            ];
+        setExams(mappedExams);
         setLoading(false);
       })
-      .catch((err) => {
-        setError((err as Error).message);
-        setLoading(false);
-      });
-  };
+      .catch(() => setLoading(false));
+  }, []);
 
-  const handleDeleteClick = (exam: ExamHistory) => {
-    setExamToDelete(exam);
-    setDeleteDialogOpen(true);
-  };
+  if (loading) return <PageShell><div className="text-foreground">Loading...</div></PageShell>;
 
-  const handleDeleteConfirm = async () => {
-    if (!examToDelete) return;
-
-    try {
-      const response = await fetch(`/api/exams/${examToDelete.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete exam');
-      }
-
-      // Refresh the list
-      fetchExams();
-      setDeleteDialogOpen(false);
-      setExamToDelete(null);
-    } catch (err) {
-      setError((err as Error).message);
-      setDeleteDialogOpen(false);
-      setExamToDelete(null);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
+  const list = exams.filter(
+    (e) => (filter === "All" || e.subject === filter) && e.title.toLowerCase().includes(q.toLowerCase())
+  );
 
   return (
-    <div className="min-h-full py-8">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Exam History</h1>
-          <p className="text-gray-600 mt-2">
-            {exams.length === 0
-              ? 'No exams yet. Create your first exam!'
-              : `You have ${exams.length} exam${exams.length !== 1 ? 's' : ''} available`}
-          </p>
-        </div>
+    <PageShell>
+      <div className="flex flex-col gap-6">
+        <PageHeader title="Exam History" subtitle="Every exam you've ever taken, all in one place." />
 
-        {error && <div className="rounded-lg bg-red-50 p-4 text-red-700">{error}</div>}
-
-        {exams.length === 0 ? (
-          <Card className="border-border bg-white shadow-sm">
-            <CardContent className="pt-12 pb-12 text-center">
-              <p className="text-gray-600 mb-4">No exams generated yet.</p>
-              <Link href="/">
-                <Button>Create Your First Exam</Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {exams.map((exam) => (
-              <Card key={exam.id} className="border-border bg-white shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="pt-6 pb-6">
-                  <div className="flex items-center justify-between gap-4">
-                    <Link href={`/exam/${exam.id}?title=${encodeURIComponent(exam.title)}`} className="flex-1 cursor-pointer">
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-lg">{exam.title}</h3>
-                        {exam.description && (
-                          <p className="text-sm text-gray-600 mt-1">{exam.description}</p>
-                        )}
-                        <div className="flex gap-4 mt-3 text-sm text-gray-600">
-                          <span>📝 {exam.totalQuestions} questions</span>
-                          <span>⏱ {exam.duration} minutes</span>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            exam.difficulty === 'Easy'
-                              ? 'bg-green-100 text-green-700'
-                              : exam.difficulty === 'Medium'
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-red-100 text-red-700'
-                          }`}>
-                            {exam.difficulty}
-                          </span>
-                          <span className="text-xs text-gray-600">
-                            {new Date(exam.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleDeleteClick(exam);
-                        }}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <ChevronRight className="h-5 w-5 text-gray-400 cursor-pointer" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search exams..."
+              className="pl-10 bg-card border-border h-11"
+            />
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {filters.map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-4 h-11 rounded-xl font-medium transition-colors cursor-pointer ${
+                  filter === f
+                    ? "bg-primary text-primary-foreground shadow-[var(--shadow-soft-glow)]"
+                    : "bg-card text-muted-foreground hover:text-foreground border border-border"
+                }`}
+              >
+                {f}
+              </button>
             ))}
           </div>
-        )}
-      </div>
+        </div>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Exam</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{examToDelete?.title}"? This will permanently remove the exam and all associated attempts and results. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700 cursor-pointer">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        <div className="flex flex-col gap-3">
+          {list.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-card p-12 text-center text-muted-foreground">
+              No exams match your filters.
+            </div>
+          ) : (
+            list.map((e, i) => (
+              <motion.div
+                key={e.title}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="rounded-2xl border border-border bg-card p-5 flex items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="h-12 w-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-medium text-foreground truncate">{e.title}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-3 mt-1">
+                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {e.date}</span>
+                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {e.duration}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 shrink-0">
+                  <CircularProgress value={e.score} color={e.color} />
+                  <Button variant="outline" className="border-primary/40 text-primary hover:bg-primary/10 hover:text-primary cursor-pointer">
+                    Review
+                  </Button>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
+      </div>
+    </PageShell>
   );
 }

@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initializeDB, getExam, updateExam } from '@/lib/db';
 import { generateQuestionsFromText } from '@/lib/ai-client';
+import type { Question } from '@/types';
+
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ examId: string }> }
 ) {
+  console.log("GENERATE API HIT");
+  
   try {
     await initializeDB();
     const { examId } = await params;
+    console.log("Exam ID:", examId);
+    
     const exam = getExam(examId);
 
     if (!exam) {
@@ -19,17 +28,37 @@ export async function POST(
       return NextResponse.json({ error: 'No content source for generation' }, { status: 400 });
     }
 
-    if (exam.questions.length > 0) {
-      // Already generated
-      return NextResponse.json({ success: true });
+    if (exam.questions && exam.questions.length > 0) {
+      console.log("GENERATION CACHED - returning existing questions");
+      return NextResponse.json({ 
+        success: true, 
+        questions: exam.questions,
+        cached: true 
+      });
     }
 
-    // Generate questions using AI
-    const questions = await generateQuestionsFromText(
-      exam.contentSource,
-      exam.totalQuestions,
-      exam.difficulty
-    );
+    let questions: Question[] = [];
+    let attempts = 0;
+    const maxAttempts = 3;
+    let lastError: Error | null = null;
+
+    while (attempts < maxAttempts) {
+      attempts++;
+      console.log("Groq attempt:", attempts);
+      
+      try {
+        questions = await generateQuestionsFromText(
+          exam.contentSource,
+          exam.totalQuestions,
+          exam.difficulty
+        );
+        break;
+      } catch (err) {
+        lastError = err as Error;
+        if (attempts >= maxAttempts) throw lastError;
+        await sleep(1000);
+      }
+    }
 
     if (questions.length === 0) {
       return NextResponse.json(
@@ -38,7 +67,8 @@ export async function POST(
       );
     }
 
-    // Update exam with questions
+    console.log("GENERATION COMPLETE");
+
     const updatedExam = {
       ...exam,
       questions,
@@ -47,11 +77,12 @@ export async function POST(
 
     updateExam(examId, updatedExam);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, cached: false });
   } catch (error) {
     console.error('Generation error:', error);
+    const userMessage = (error as Error).message;
     return NextResponse.json(
-      { error: `Server error: ${(error as Error).message}` },
+      { error: userMessage },
       { status: 500 }
     );
   }
