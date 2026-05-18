@@ -19,14 +19,14 @@ export const metadata: Metadata = {
   authors: [{ name: 'ExamGhost' }],
   creator: 'ExamGhost',
   publisher: 'ExamGhost',
-  metadataBase: new URL('https://exam-ghost.vercel.app/'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://exam-ghost.vercel.app/'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://exam-ghost.vercel.app/',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://exam-ghost.vercel.app/',
     title: 'ExamGhost - AI-Powered Exam Simulator',
     description: 'Transform your study materials into realistic timed exams with AI-generated questions. Upload PDFs, notes, or slides and practice with voice-enabled exams.',
     siteName: 'ExamGhost',
@@ -98,8 +98,8 @@ export default function RootLayout({
               description: 'Transform your study materials into realistic timed exams with AI-generated questions',
               applicationCategory: 'EducationalApplication',
               operatingSystem: 'All',
-              url: 'https://exam-ghost.vercel.app/',
-              logo: 'https://exam-ghost.vercel.app//icon.svg',
+              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://exam-ghost.vercel.app/',
+              logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://exam-ghost.vercel.app/'}/ghost-logo.png`,
               offers: {
                 '@type': 'Offer',
                 price: '0',
