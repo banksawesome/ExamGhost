@@ -18,16 +18,6 @@ import {
   Loader2,
 } from 'lucide-react';
 import { PageShell } from '@/components/exam-ghost/PageShell';
-import type { Metadata } from 'next'
-
-export async function generateMetadata({ params }: { params: Promise<{ examId: string }> }): Promise<Metadata> {
-  const { examId } = await params;
-  return {
-    title: `Exam Setup ${examId} | ExamGhost`,
-    description: 'Review exam settings and prepare for your AI-generated exam.',
-    robots: { index: false, follow: false },
-  };
-}
 
 type Phase = 'instructions' | 'generating' | 'countdown';
 
@@ -127,7 +117,7 @@ export default function ProcessingPage() {
 
   return (
     <PageShell fullscreen>
-      <div className="w-full max-w-6xl mx-auto p-6">
+      <div className="w-full max-w-6xl mx-auto py-6 px-2">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground">Pre-Exam Instructions</h1>
           <p className="text-muted-foreground mt-1">

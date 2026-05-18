@@ -6,13 +6,6 @@ import { PageShell } from "@/components/exam-ghost/PageShell";
 import { PageHeader } from "@/components/exam-ghost/PageHeader";
 import { useEffect, useState } from "react";
 import type { Bookmark as BookmarkType } from "@/types";
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Bookmarks',
-  description: 'Review your bookmarked questions and revisit important topics.',
-  robots: { index: true, follow: true },
-}
 
 const topics = ["All", "Physics", "Math", "Chemistry"] as const;
 const diffColors: Record<string, string> = {

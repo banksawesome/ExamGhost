@@ -20,16 +20,6 @@ import { PageShell } from '@/components/exam-ghost/PageShell';
 import { PageHeader } from '@/components/exam-ghost/PageHeader';
 import { CircularProgress } from '@/components/exam-ghost/CircularProgress';
 import { Button } from '@/components/ui/button';
-import type { Metadata } from 'next'
-
-export async function generateMetadata({ params }: { params: Promise<{ attemptId: string }> }): Promise<Metadata> {
-  const { attemptId } = await params;
-  return {
-    title: `Exam Results ${attemptId} | ExamGhost`,
-    description: 'View your exam results, analyze performance, and review questions.',
-    robots: { index: false, follow: false },
-  };
-}
 
 interface Feedback {
   questionIndex: number;

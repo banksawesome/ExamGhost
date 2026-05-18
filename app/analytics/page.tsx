@@ -11,13 +11,6 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Analytics',
-  description: 'Analyze your exam performance with detailed insights, topic breakdowns, and skill tracking.',
-  robots: { index: true, follow: true },
-}
 
 interface AnalyticsAPIData {
   stats?: { accuracy: number; avgTime: number; improvement: number };

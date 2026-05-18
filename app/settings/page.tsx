@@ -11,13 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Settings',
-  description: 'Customize your ExamGhost experience, manage preferences, and update your profile.',
-  robots: { index: true, follow: true },
-}
 
 const diffs = ["Easy", "Medium", "Hard"] as const;
 

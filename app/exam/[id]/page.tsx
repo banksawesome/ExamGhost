@@ -21,16 +21,6 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { getVoiceController } from '@/lib/voice';
 import type { Exam } from '@/types';
-import type { Metadata } from 'next'
-
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
-  return {
-    title: `Exam ${id} | ExamGhost`,
-    description: 'Take your AI-generated exam with timed questions and voice interaction.',
-    robots: { index: false, follow: false },
-  };
-}
 
 export default function ExamPage() {
   const router = useRouter();
