@@ -7,13 +7,16 @@ import { Header } from "./Header";
 import { NameModal } from "./NameModal";
 import { LoadingScreen } from "./LoadingScreen";
 import { useSidebarCtx } from "./sidebar-context";
+import { usePathname } from "next/navigation";
 
 export function PageShell({
   children,
   rightPanel,
+  fullscreen = false,
 }: {
   children: ReactNode;
   rightPanel?: ReactNode;
+  fullscreen?: boolean;
 }) {
   const { toggle } = useSidebarCtx();
   const [loading, setLoading] = useState(true);
@@ -29,7 +32,23 @@ export function PageShell({
     }
   }, []);
 
+  const pathname = usePathname();
+  const hideHeader = pathname === "/";
+
   if (loading) return <LoadingScreen />;
+
+  if (fullscreen) {
+    return (
+      <>
+        <NameModal />
+        <div className="min-h-screen w-full bg-background flex">
+          <main className="flex-1 min-w-0 px-4 md:px-8 py-6 flex flex-col">
+            <div className="flex-1 min-w-0 w-full">{children}</div>
+          </main>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -50,6 +69,11 @@ export function PageShell({
               <div className="lg:hidden">
                 <Header compact />
               </div>
+              {!hideHeader && (
+                <div className="hidden lg:flex">
+                  <Header />
+                </div>
+              )}
             </div>
 
             <div className="flex-1 min-w-0">{children}</div>

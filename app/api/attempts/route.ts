@@ -23,17 +23,16 @@ export async function POST(request: NextRequest) {
     let correctCount = 0;
     const userAnswers: UserAnswer[] = [];
 
-    for (let i = 0; i < answers.length; i++) {
-      const selectedAnswer = answers[i];
-      const question = exam.questions[i];
-
+    // Answers come as array of objects with questionIndex and selectedAnswer
+    for (const answer of answers) {
+      const question = exam.questions[answer.questionIndex];
       if (question) {
-        const isCorrect = selectedAnswer === question.correctAnswer;
+        const isCorrect = answer.selectedAnswer === question.correctAnswer;
         if (isCorrect) correctCount++;
 
         userAnswers.push({
-          questionIndex: i,
-          selectedAnswer,
+          questionIndex: answer.questionIndex,
+          selectedAnswer: answer.selectedAnswer,
           isCorrect,
         });
       }
@@ -68,12 +67,14 @@ export async function POST(request: NextRequest) {
       total: exam.questions.length,
       percentage,
       timeTaken: timeTaken || 0,
-      feedback: userAnswers.map((answer, idx) => ({
-        questionIndex: idx,
+      feedback: userAnswers.map((answer) => ({
+        questionIndex: answer.questionIndex,
+        questionText: exam.questions[answer.questionIndex].questionText,
         selectedAnswer: answer.selectedAnswer,
-        correctAnswer: exam.questions[idx].correctAnswer,
+        options: exam.questions[answer.questionIndex].options,
+        correctAnswer: exam.questions[answer.questionIndex].correctAnswer,
         isCorrect: answer.isCorrect,
-        explanation: exam.questions[idx].explanation,
+        explanation: exam.questions[answer.questionIndex].explanation,
       })),
     });
   } catch (error) {

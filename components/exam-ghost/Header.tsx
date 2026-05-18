@@ -1,15 +1,17 @@
 "use client";
 
-import { Moon, BarChart3, ChevronDown } from "lucide-react";
+import { Moon, Sun, BarChart3, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 export function Header({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname();
   const [userName, setUserName] = useState("Aditya Verma");
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const name = localStorage.getItem("examghost:name");
@@ -21,9 +23,14 @@ export function Header({ compact = false }: { compact?: boolean }) {
       <div className="flex items-center gap-3">
         <button
           aria-label="Toggle theme"
-          className="h-10 w-10 rounded-full bg-card border border-border flex items-center justify-center text-foreground cursor-pointer"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="h-10 w-10 rounded-full bg-card border border-border flex items-center justify-center text-foreground cursor-pointer hover:bg-accent transition-colors"
         >
-          <Moon className="h-4 w-4" />
+          {theme === "dark" ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
         </button>
         <Avatar className="h-10 w-10 bg-primary">
           <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
@@ -39,9 +46,14 @@ export function Header({ compact = false }: { compact?: boolean }) {
       <div className="flex items-center gap-4">
         <button
           aria-label="Toggle theme"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="h-11 w-11 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:bg-accent transition-colors cursor-pointer"
         >
-          <Moon className="h-5 w-5" />
+          {theme === "dark" ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
         </button>
         <div className="flex items-center gap-3">
           <Avatar className="h-11 w-11 bg-primary">

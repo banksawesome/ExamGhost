@@ -54,7 +54,14 @@ export default function HomePage() {
       }
 
       const data = await response.json();
-      router.push(`/processing/${data.examId}?title=${encodeURIComponent(data.examTitle)}`);
+      const params = new URLSearchParams({
+        title: data.examTitle,
+        duration: data.duration.toString(),
+        difficulty: data.difficulty,
+        numQuestions: (data.totalQuestions || 15).toString(),
+        voice: data.voiceEnabled ? 'true' : 'false',
+      });
+      router.push(`/processing/${data.examId}?${params.toString()}`);
     } catch (err) {
       setError((err as Error).message);
       setLoading(false);

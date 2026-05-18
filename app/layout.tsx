@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SidebarProvider } from '@/components/exam-ghost/sidebar-context'
+import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import './globals.css'
 
@@ -39,11 +40,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <SidebarProvider>
-          {children}
-        </SidebarProvider>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SidebarProvider>
+            {children}
+          </SidebarProvider>
+          {process.env.NODE_ENV === 'production' && <Analytics />}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -4,17 +4,10 @@ import { motion } from "framer-motion";
 import { Bookmark, X } from "lucide-react";
 import { PageShell } from "@/components/exam-ghost/PageShell";
 import { PageHeader } from "@/components/exam-ghost/PageHeader";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Bookmark as BookmarkType } from "@/types";
 
-const initial = [
-  { id: 1, subject: "Physics", difficulty: "Hard", q: "A 2 kg block slides down a 30° incline with friction coefficient 0.2. Find the acceleration." },
-  { id: 2, subject: "Math", difficulty: "Medium", q: "Evaluate the integral of x·sin(x) dx using integration by parts." },
-  { id: 3, subject: "Chemistry", difficulty: "Easy", q: "Identify the product of the reaction between ethene and HBr." },
-  { id: 4, subject: "Physics", difficulty: "Medium", q: "State and derive the lens maker's formula." },
-  { id: 5, subject: "Math", difficulty: "Hard", q: "Prove that the sum of the first n cubes equals the square of the sum of the first n integers." },
-];
-
-const subjects = ["All", "Physics", "Math", "Chemistry"] as const;
+const topics = ["All", "Physics", "Math", "Chemistry"] as const;
 const diffColors: Record<string, string> = {
   Easy: "bg-success/15 text-success",
   Medium: "bg-warning/15 text-warning",
@@ -22,10 +15,34 @@ const diffColors: Record<string, string> = {
 };
 
 export default function BookmarksPage() {
-  const [items, setItems] = useState(initial);
-  const [filter, setFilter] = useState<(typeof subjects)[number]>("All");
+  const [items, setItems] = useState<BookmarkType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<(typeof topics)[number]>("All");
 
-  const list = items.filter((i) => filter === "All" || i.subject === filter);
+  useEffect(() => {
+    fetch("/api/bookmarks")
+      .then((res) => res.json())
+      .then((data) => {
+        setItems(data.bookmarks || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const list = items.filter((i) => filter === "All" || i.examTitle.toLowerCase().includes(filter.toLowerCase()));
+
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/bookmarks?id=${id}`, { method: 'DELETE' });
+    setItems((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  if (loading) {
+    return (
+      <PageShell>
+        <div className="text-muted-foreground">Loading bookmarks...</div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell>
@@ -33,17 +50,17 @@ export default function BookmarksPage() {
         <PageHeader title="Bookmarks" subtitle="Questions you saved to revisit later." />
 
         <div className="flex gap-2 flex-wrap">
-          {subjects.map((s) => (
+          {topics.map((t) => (
             <button
-              key={s}
-              onClick={() => setFilter(s)}
+              key={t}
+              onClick={() => setFilter(t)}
               className={`px-4 h-10 rounded-xl font-medium transition-colors cursor-pointer ${
-                filter === s
+                filter === t
                   ? "bg-primary text-primary-foreground"
                   : "bg-card text-muted-foreground hover:text-foreground border border-border"
               }`}
             >
-              {s}
+              {t}
             </button>
           ))}
         </div>
@@ -65,18 +82,18 @@ export default function BookmarksPage() {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded-md bg-primary/15 text-primary font-medium">{it.subject}</span>
+                    <span className="text-xs px-2 py-1 rounded-md bg-primary/15 text-primary font-medium">{it.examTitle}</span>
                     <span className={`text-xs px-2 py-1 rounded-md font-medium ${diffColors[it.difficulty]}`}>{it.difficulty}</span>
                   </div>
                   <button
-                    onClick={() => setItems((prev) => prev.filter((p) => p.id !== it.id))}
+                    onClick={() => handleDelete(it.id)}
                     aria-label="Remove bookmark"
                     className="h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground flex items-center justify-center cursor-pointer"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="text-foreground leading-relaxed">{it.q}</p>
+                <p className="text-foreground leading-relaxed">{it.questionText}</p>
                 <div className="flex items-center gap-2 text-xs text-primary mt-auto">
                   <Bookmark className="h-4 w-4 fill-current" /> Saved
                 </div>

@@ -10,7 +10,7 @@ import { CircularProgress } from "@/components/exam-ghost/CircularProgress";
 import { useState, useEffect } from "react";
 
 interface ExamItem {
-  subject: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
   title: string;
   date: string;
   duration: string;
@@ -18,12 +18,12 @@ interface ExamItem {
   color: string;
 }
 
-const filters = ["All", "Physics", "Math", "Chemistry"] as const;
+const difficulties = ["All", "Easy", "Medium", "Hard"] as const;
 
 export default function HistoryPage() {
   const [exams, setExams] = useState<ExamItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"All" | "Physics" | "Math" | "Chemistry">("All");
+  const [filter, setFilter] = useState<"All" | "Easy" | "Medium" | "Hard">("All");
   const [q, setQ] = useState("");
 
   useEffect(() => {
@@ -32,20 +32,14 @@ export default function HistoryPage() {
       .then((data) => {
         const mappedExams = data.exams?.length
           ? data.exams.map((e: any) => ({
-              subject: e.subject || "General",
+              difficulty: e.difficulty || "Medium",
               title: e.title,
               date: new Date(e.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
               duration: `${e.duration} mins`,
               score: Math.floor(Math.random() * 30) + 60,
-              color: e.subject === "Physics" ? "oklch(0.7 0.18 30)" : e.subject === "Math" ? "var(--primary)" : "oklch(0.72 0.18 155)",
+              color: e.difficulty === "Easy" ? "oklch(0.72 0.18 155)" : e.difficulty === "Medium" ? "var(--primary)" : "oklch(0.7 0.18 30)",
             }))
-          : [
-              { subject: "Physics", title: "Physics – Mechanics", date: "May 14, 2026", duration: "60 mins", score: 72, color: "oklch(0.7 0.18 30)" },
-              { subject: "Math", title: "Math – Calculus", date: "May 12, 2026", duration: "45 mins", score: 65, color: "var(--primary)" },
-              { subject: "Chemistry", title: "Chemistry – Organic", date: "May 10, 2026", duration: "75 mins", score: 88, color: "oklch(0.72 0.18 155)" },
-              { subject: "Math", title: "Math – Algebra", date: "May 7, 2026", duration: "30 mins", score: 91, color: "var(--primary)" },
-              { subject: "Physics", title: "Physics – Optics", date: "May 3, 2026", duration: "50 mins", score: 58, color: "oklch(0.7 0.18 30)" },
-            ];
+          : [];
         setExams(mappedExams);
         setLoading(false);
       })
@@ -55,7 +49,7 @@ export default function HistoryPage() {
   if (loading) return <PageShell><div className="text-foreground">Loading...</div></PageShell>;
 
   const list = exams.filter(
-    (e) => (filter === "All" || e.subject === filter) && e.title.toLowerCase().includes(q.toLowerCase())
+    (e) => (filter === "All" || e.difficulty === filter) && e.title.toLowerCase().includes(q.toLowerCase())
   );
 
   return (
@@ -74,7 +68,7 @@ export default function HistoryPage() {
             />
           </div>
           <div className="flex gap-2 flex-wrap">
-            {filters.map((f) => (
+            {difficulties.map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}

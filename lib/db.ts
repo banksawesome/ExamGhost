@@ -9,6 +9,7 @@ interface Database {
   exams: Record<string, Exam>;
   attempts: Record<string, UserAttempt>;
   analytics: AnalyticsData;
+  bookmarks: Record<string, import('@/types').Bookmark>;
 }
 
 let db: Database = {
@@ -26,6 +27,7 @@ let db: Database = {
     },
     progressHistory: [],
   },
+  bookmarks: {},
 };
 
 export async function initializeDB() {
@@ -188,7 +190,7 @@ export function recalculateAnalytics() {
     .slice(0, 3)
     .map(([topic]) => topic);
 
-  db.analytics = {
+db.analytics = {
     totalExamsCompleted: allAttempts.length,
     averageScore,
     weakTopics,
@@ -197,4 +199,36 @@ export function recalculateAnalytics() {
     progressHistory,
   };
   saveDB();
+}
+
+// Bookmark operations
+export function createBookmark(bookmark: {
+  examId: string;
+  examTitle: string;
+  questionIndex: number;
+  questionText: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+}) {
+  const id = `${bookmark.examId}-${bookmark.questionIndex}-${Date.now()}`;
+  const newBookmark = {
+    id,
+    ...bookmark,
+    createdAt: Date.now(),
+  };
+  db.bookmarks[id] = newBookmark;
+  saveDB();
+  return newBookmark;
+}
+
+export function getAllBookmarks(): import('@/types').Bookmark[] {
+  return Object.values(db.bookmarks).sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export function deleteBookmark(id: string): boolean {
+  if (db.bookmarks[id]) {
+    delete db.bookmarks[id];
+    saveDB();
+    return true;
+  }
+  return false;
 }

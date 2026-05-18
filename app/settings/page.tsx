@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 
 const diffs = ["Easy", "Medium", "Hard"] as const;
 
@@ -34,7 +35,7 @@ export default function SettingsPage() {
   const [name, setName] = useState("Aditya Verma");
   const [email, setEmail] = useState("aditya@example.com");
   const [voice, setVoice] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  const { theme, setTheme } = useTheme();
   const [defaultDiff, setDefaultDiff] = useState<(typeof diffs)[number]>("Medium");
   const [emailNotif, setEmailNotif] = useState(true);
   const [pushNotif, setPushNotif] = useState(false);
@@ -76,7 +77,7 @@ export default function SettingsPage() {
                 <div className="font-medium text-foreground">Dark mode</div>
                 <p className="text-xs text-muted-foreground">Easy on the eyes, optimized for late-night study.</p>
               </div>
-              <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+              <Switch checked={theme === 'dark'} onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')} />
             </li>
             <li className="flex items-center justify-between py-3">
               <div>

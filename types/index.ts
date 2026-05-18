@@ -68,3 +68,13 @@ export interface UploadRequest {
   file: File;
   settings: ExamSettings;
 }
+
+export interface Bookmark {
+  id: string;
+  examId: string;
+  examTitle: string;
+  questionIndex: number;
+  questionText: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  createdAt: number;
+}
