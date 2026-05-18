@@ -18,6 +18,16 @@ import {
   Loader2,
 } from 'lucide-react';
 import { PageShell } from '@/components/exam-ghost/PageShell';
+import type { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: Promise<{ examId: string }> }): Promise<Metadata> {
+  const { examId } = await params;
+  return {
+    title: `Exam Setup ${examId} | ExamGhost`,
+    description: 'Review exam settings and prepare for your AI-generated exam.',
+    robots: { index: false, follow: false },
+  };
+}
 
 type Phase = 'instructions' | 'generating' | 'countdown';
 

@@ -7,6 +7,13 @@ import { PageShell } from "@/components/exam-ghost/PageShell";
 import { PageHeader } from "@/components/exam-ghost/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  description: 'Track your exam performance, view analytics, and continue where you left off.',
+  robots: { index: true, follow: true },
+}
 
 interface AnalyticsData {
   totalExamsCompleted: number;

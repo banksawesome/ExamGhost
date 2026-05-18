@@ -12,19 +12,19 @@ export function HeroSection() {
         className="max-w-xl"
       >
         <h1 className="text-4xl md:text-5xl font-bold leading-tight text-foreground">
-          Turn your study material into a{" "}
+          AI-Powered Exam Simulator - Turn Your Study Material Into{" "}
           <span className="bg-[image:var(--gradient-primary)] bg-clip-text text-transparent">
-            real exam.
+            Real Exams
           </span>
         </h1>
         <p className="mt-4 text-muted-foreground text-base md:text-lg leading-relaxed">
-          Upload your notes, PDFs, slides or textbook pages and get a timed exam with AI-generated questions.
+          Upload your notes, PDFs, slides or textbook pages and get a timed exam with AI-generated questions. Perfect for test preparation, exam practice, and knowledge retention.
         </p>
       </motion.div>
 
       <motion.img
         src="/ghost-mascot.png"
-        alt="ExamGhost mascot"
+        alt="ExamGhost AI exam simulator mascot - transform study materials into exams"
         width={220}
         height={220}
         className="hidden md:block h-44 w-44 lg:h-52 lg:w-52 object-contain drop-shadow-[0_0_32px_oklch(0.62_0.22_260/0.5)]"

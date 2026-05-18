@@ -8,6 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CircularProgress } from "@/components/exam-ghost/CircularProgress";
 import { useState, useEffect } from "react";
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Exam History',
+  description: 'View all your past exams, scores, and performance analytics. Track your progress over time with ExamGhost.',
+  robots: { index: true, follow: true },
+}
 
 interface ExamItem {
   difficulty: 'Easy' | 'Medium' | 'Hard';
