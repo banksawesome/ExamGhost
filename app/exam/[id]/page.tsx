@@ -82,6 +82,9 @@ export default function ExamPage() {
           setExam(data);
           setSecondsLeft(data.duration * 60);
           setVoiceEnabled(searchParams.get('voice') === 'true');
+          if (searchParams.get('voice') === 'true') {
+            setVoiceOn(true);
+          }
         }
         setLoading(false);
       })
@@ -210,12 +213,17 @@ export default function ExamPage() {
     }
   }
 
-  function handleVoiceAnswer() {
+  async function handleVoiceAnswer() {
     voiceController.startListening()
       .then((text) => {
         const answerIndex = voiceController.mapVoiceToAnswer(text);
         if (answerIndex !== null) {
           pick(answerIndex);
+          if (currentQuestion < exam.questions.length - 1) {
+            setCurrentQuestion((c) => Math.min(exam.questions.length - 1, c + 1));
+          } else {
+            handleSubmitExam();
+          }
         }
       })
       .catch(console.error);
